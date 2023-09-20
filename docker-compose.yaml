@@ -1,0 +1,28 @@
+version: '3.8'
+secrets:
+  db:
+    image: postgres
+    container_name: tpo-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - 5050:5432
+    volumes:
+      - ./migrations:/docker-entrypoint-initdb.d  # initial schema
+      - ./data:/var/lib/postgresql/data           # persistent data
+  server:
+    build: . --tag tpo-server
+    container_name: tpo-server
+    ports:
+      - 8000:8000
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: postgres
+    depends_on:
+      - db
+
