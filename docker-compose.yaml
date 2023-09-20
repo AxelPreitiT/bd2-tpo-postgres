@@ -3,15 +3,15 @@ secrets:
   db:
     image: postgres
     container_name: tpo-db
-    environment:
+    environment:                                  # DB credentials
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     ports:
       - 5050:5432
     volumes:
-      - ./migrations:/docker-entrypoint-initdb.d  # initial schema
-      - ./data:/var/lib/postgresql/data           # persistent data
+      - ./migrations:/docker-entrypoint-initdb.d  # initial schema (executes sql files in first start)
+      - ./data:/var/lib/postgresql/data           # persistent data (stored in host machine)
   server:
     build: . --tag tpo-server
     container_name: tpo-server
