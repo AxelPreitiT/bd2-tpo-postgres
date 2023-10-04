@@ -30,7 +30,7 @@ const client = new pg.Client({
 */
 
 app.listen(8000, () => {
-    console.log('Server running on port 8000');
+    console.log('Server running on port 8000 MAN');
 });
 
 
