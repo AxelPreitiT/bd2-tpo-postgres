@@ -58,6 +58,7 @@ services:
     env_file: 
       - .env
     environment:
+      - POSTGRES_HOST=tpo_db_postgres
       - POSTGRES_PORT=5432
       - MONGO_PORT=27017
     volumes:
