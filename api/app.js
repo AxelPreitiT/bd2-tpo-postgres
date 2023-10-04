@@ -9,11 +9,11 @@ var jsonParser = bodyParser.json()
 
 const pg = require('pg');
 const pool = new pg.Pool({
-    host: 'localhost',
-    port: 5432,
-    database: 'postgres',
-    user: 'postgres',
-    password: 'mysecretpassword',
+    host: 'tpo_db_postgres',
+    port: process.env.POSTGRES_PORT,
+    database: process.env.POSTGRES_DB,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
@@ -28,10 +28,6 @@ const client = new pg.Client({
     password: 'mysecretpassword',
   })
 */
-
-app.listen(8000, () => {
-    console.log('Server running on port 8000 MAN');
-});
 
 
 /* ----------------------------------------------------------------------------- */
@@ -204,7 +200,7 @@ app.put("/products", async(req, res) => {
         await pool.query('UPDATE E01_PRODUCTO SET "stock" = $1 WHERE "codigo_producto" = $2', [req.body.stock, req.body.codigo_producto]);
     }
 
-    await client.end()
+    // await client.end()
 
     // Respuesta
     res.status(200).json({
@@ -212,3 +208,7 @@ app.put("/products", async(req, res) => {
     })
 });
 
+
+app.listen(8000, () => {
+    console.log('Server running on port 8000');
+});
