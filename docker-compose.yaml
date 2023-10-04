@@ -1,28 +1,81 @@
 version: '3.8'
-secrets:
-  db:
+services:
+  postgres:
     image: postgres
-    container_name: tpo-db
+    container_name: tpo_db_postgres
+    env_file:
+      - .env
     environment:                                  # DB credentials
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
-      - 5050:5432
+      - ${POSTGRES_PORT}:5432
     volumes:
-      - ./migrations:/docker-entrypoint-initdb.d  # initial schema (executes sql files in first start)
-      - ./data:/var/lib/postgresql/data           # persistent data (stored in host machine)
-  server:
-    build: . --tag tpo-server
-    container_name: tpo-server
-    ports:
-      - 8000:8000
+      # Para scripts de inicialización, todo lo que esté en docker-entrypoint-initdb.d se va a ejecutar solo si data esta vacío
+      # https://hub.docker.com/_/postgres
+      # Esto es un bind mount (no un volumen)
+      # <path_host>:<path_contenedor>:<opciones>
+      - ./migrations/schema.sql:/docker-entrypoint-initdb.d/init.sql  # initial schema (executes sql files in first start)
+      # <nombre_volumen>:<path_en_contenedor>:<opciones>
+      - bd2_postgres_data:/var/lib/postgresql/data           # persistent data (stored in host machine) 
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 4s
+      retries: 5
+      start_period: 10s
+      start_interval: 2s
+  mongo:
+    image: mongo
+    container_name: tpo_db_mongo
+    env_file:
+      - .env
     environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: postgres
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    ports:
+      - ${MONGO_PORT}:27017
+    volumes: 
+      - bd2_mongo_data:/data/db
+    # https://docs.docker.com/compose/compose-file/05-services/#healthcheck
+    # https://docs.docker.com/engine/reference/builder/#healthcheck
+    # healthcheck:
+    #   test: [ "CMD", "mongosh --eval", "'db.runCommand(\"ping\").ok'", "--quiet"]
+    #   interval: 1m30s #Tiempo entre intentos
+    #   timeout: 10s #Tiempo a partir del cual considera que el intento fallo
+    #   retries: 3 #cantidad de intentos 
+    #   start_period: 40s #tiempo hasta empezar a contar los intentos fallidos (antes intenta por si se levanta rapido)
+    #   start_interval: 5s #tiempo entre los primeros intentos 
+      
+  server:
+    build: ./api/.
+    container_name: tpo_server
+    ports:
+      - ${EXPRESS_PORT}:8000
+    #https://docs.docker.com/compose/environment-variables/env-file/
+    command: npm start
+    env_file: 
+      - .env
+    environment:
+      - POSTGRES_PORT=5432
+      - MONGO_PORT=27017
+    volumes:
+      # Esto es un bind
+      - ./api/:/usr/src/app
+      # Esto es un volumen
+      - node_modules:/usr/src/app/node_modules
+    # https://docs.docker.com/compose/compose-file/05-services/#depends_on
     depends_on:
-      - db
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_started
 
+# docker compose down --rmi local -v
+# docker compose up
+
+volumes:
+  bd2_postgres_data:
+  bd2_mongo_data: 
+  node_modules:
