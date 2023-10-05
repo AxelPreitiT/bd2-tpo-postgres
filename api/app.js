@@ -5,7 +5,16 @@ const MongoPersistence = require('./mongo_persistence')
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
-const persistence = new MongoPersistence()
+
+const DBMS = process.env.DBMS.toLowerCase()
+
+if(DBMS!=='mongo' && DBMS!=='postgres'){
+    console.log("DBMS environment variable should be 'mongo' or 'postgres'")
+    process.exit(1)
+}
+
+const persistence = process.env.DBMS==='mongo'?new MongoPersistence : new PostgresPersistence()
+// const persistence = new MongoPersistence()
 // const persistence = new PostgresPersistence()
 
 /* ----------------------------------------------------------------------------- */
