@@ -1,8 +1,9 @@
 version: '3.8'
+name: bd2_tpo
 services:
   postgres:
     image: postgres
-    container_name: tpo_db_postgres
+    container_name: ${POSTGRES_CONTAINER_NAME}
     env_file:
       - .env
     environment:                                  # DB credentials
@@ -18,7 +19,8 @@ services:
       # <path_host>:<path_contenedor>:<opciones>
       - ./migrations/schema.sql:/docker-entrypoint-initdb.d/init.sql  # initial schema (executes sql files in first start)
       # <nombre_volumen>:<path_en_contenedor>:<opciones>
-      - bd2_postgres_data:/var/lib/postgresql/data           # persistent data (stored in host machine) 
+      - bd2_tpo_postgres_data:/var/lib/postgresql/data                    # persistent data (stored in host machine) 
+      - bd2_tpo_pg_to_mongo_data:${PG_TO_MONGO_DATA_DIR}                      # TSV files to be imported to mongo
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 5s
@@ -28,7 +30,7 @@ services:
       start_interval: 2s
   mongo:
     image: mongo
-    container_name: tpo_db_mongo
+    container_name: ${MONGO_CONTAINER_NAME}
     env_file:
       - .env
     environment:
@@ -37,7 +39,8 @@ services:
     ports:
       - ${MONGO_PORT}:27017
     volumes: 
-      - bd2_mongo_data:/data/db
+      - bd2_tpo_mongo_data:/data/db                               # persistent data (stored in host machine)
+      - bd2_tpo_pg_to_mongo_data:${PG_TO_MONGO_DATA_DIR}              # TSV files to be imported to mongo
     # https://docs.docker.com/compose/compose-file/05-services/#healthcheck
     # https://docs.docker.com/engine/reference/builder/#healthcheck
     # healthcheck:
@@ -50,7 +53,7 @@ services:
       
   server:
     build: ./api/.
-    container_name: tpo_server
+    container_name: ${SERVER_CONTAINER_NAME}
     ports:
       - ${EXPRESS_PORT}:8000
     #https://docs.docker.com/compose/environment-variables/env-file/
@@ -58,15 +61,15 @@ services:
     env_file: 
       - .env
     environment:
-      - POSTGRES_HOST=tpo_db_postgres
+      - POSTGRES_HOST=${POSTGRES_CONTAINER_NAME}
       - POSTGRES_PORT=5432
       - MONGO_PORT=27017
-      - MONGO_HOST=tpo_db_mongo
+      - MONGO_HOST=${MONGO_CONTAINER_NAME}
     volumes:
       # Esto es un bind
       - ./api/:/usr/src/app
       # Esto es un volumen
-      - node_modules:/usr/src/app/node_modules
+      - bd2_tpo_node_modules:/usr/src/app/node_modules
     # https://docs.docker.com/compose/compose-file/05-services/#depends_on
     depends_on:
       postgres:
@@ -78,6 +81,7 @@ services:
 # docker compose up
 
 volumes:
-  bd2_postgres_data:
-  bd2_mongo_data: 
-  node_modules:
+  bd2_tpo_postgres_data:
+  bd2_tpo_mongo_data: 
+  bd2_tpo_node_modules:
+  bd2_tpo_pg_to_mongo_data:
