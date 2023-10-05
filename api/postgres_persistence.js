@@ -3,7 +3,7 @@ const pg = require('pg')
 // const pg = require('pg');
 
 
-class PostgresPersistance extends Persistance{
+class PostgresPersistence extends Persistance{
 
     constructor(){
         super()
@@ -96,4 +96,4 @@ class PostgresPersistance extends Persistance{
     }    
 }
 
-module.exports = PostgresPersistance
+module.exports = PostgresPersistence

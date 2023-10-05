@@ -1,8 +1,5 @@
 class Persistance{
-    constructor(){
-        this.message = "Hello"
-    }
-    async insertClient(client){
+    async insertClient(clientInfo){
         throw new Error("Method is not implemented")
     }
     async deleteClient(clientId){
@@ -14,7 +11,7 @@ class Persistance{
     async getClient(clientId){
         throw new Error("Method is not implemented")
     }
-    async insertProduct(product){
+    async insertProduct(productInfo){
         throw new Error("Method is not implemented")
     }
     async modifyProduct(productId, productInfo){

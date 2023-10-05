@@ -1,11 +1,12 @@
 const express = require('express');
 var bodyParser = require('body-parser')
 const PostgresPersistence = require('./postgres_persistence')
+const MongoPersistence = require('./mongo_persistence')
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
-
-const persistance = new PostgresPersistence()
+const persistence = new MongoPersistence()
+// const persistence = new PostgresPersistence()
 
 /* ----------------------------------------------------------------------------- */
 // CLIENTES
@@ -27,7 +28,7 @@ app.post("/client", async(req, res) => {
 
     // SQL
     try{
-        const result = await persistance.insertClient(req.body)
+        const result = await persistence.insertClient(req.body)
         // Respuesta
         return res.status(200).json(result)
     }catch(error){
@@ -42,7 +43,7 @@ app.post("/client", async(req, res) => {
 app.delete("/client/:nro_cliente", async(req, res) => {
 
     try{
-        await persistance.deleteClient(req.params.nro_cliente)
+        await persistence.deleteClient(req.params.nro_cliente)
         return res.status(200).json({
             message: `Client ${req.params.nro_cliente} deleted`
         })
@@ -58,7 +59,7 @@ app.delete("/client/:nro_cliente", async(req, res) => {
 app.put("/client/:nro_cliente", async(req, res) => {
 
     try{
-        const result = await persistance.modifyClient(req.params.nro_cliente, req.body)
+        const result = await persistence.modifyClient(req.params.nro_cliente, req.body)
         return res.status(200).json({message:`Client ${req.params.nro_cliente} modified`})
     }catch(error){
         return res.status(404).json({
@@ -71,7 +72,7 @@ app.put("/client/:nro_cliente", async(req, res) => {
 
 app.get('/client/:nro_cliente', async (req, res)=>{
     try{
-        const result = await persistance.getClient(req.params.nro_cliente)
+        const result = await persistence.getClient(req.params.nro_cliente)
         return res.status(200).json(result)
     }catch(error){
         return res.status(404).json({
@@ -101,7 +102,7 @@ app.post("/products", async(req, res) => {
     // SQL
     
     try{
-        const result = await persistance.insertProduct(req.body)
+        const result = await persistence.insertProduct(req.body)
         // Respuesta
         return res.status(200).json(result)
     }catch(error){
@@ -115,7 +116,7 @@ app.post("/products", async(req, res) => {
 app.put("/products/:codigo_producto", async (req, res) => {
 
     try{
-        const result = await persistance.modifyProduct(req.params.codigo_producto, req.body)
+        const result = await persistence.modifyProduct(req.params.codigo_producto, req.body)
         return res.status(200).json(
             {message: `Product ${req.params.codigo_producto} modified`}
         )
@@ -129,7 +130,7 @@ app.put("/products/:codigo_producto", async (req, res) => {
 
 app.get("/products/:codigo_producto", async (req, res)=>{
     try{
-        const result = await persistance.getProduct(req.params.codigo_producto)
+        const result = await persistence.getProduct(req.params.codigo_producto)
         return res.status(200).json(result)
     }catch(error){
         return res.status(404).json({
