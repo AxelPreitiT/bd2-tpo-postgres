@@ -153,4 +153,37 @@ db.E01_FACTURA.aggregate([
             _id:0
         }
     }
-])
+]);
+
+// 9
+db.E01_TELEFONO.aggregate([
+    {
+        $lookup: {
+            from: "E01_CLIENTE",
+            localField: "nro_cliente",
+            foreignField: "_id",
+            as: "cliente"
+        }
+    },
+]);
+
+
+// 10
+db.E01_CLIENTE.aggregate([
+    {
+        $lookup: {
+            from: "E01_FACTURA",
+            localField: "_id",
+            foreignField: "nro_cliente",
+            as: "facturas"
+        }
+    },
+    {
+        $project:{
+            nombre: 1,
+            apellido: 1,
+            _id: 0,
+            total_gastado: {$sum:"$facturas.total_con_iva"}
+        }
+    }
+]);
