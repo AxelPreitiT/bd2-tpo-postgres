@@ -15,16 +15,21 @@ migrate_table() {
     local mongo_extra_cmd="$4"
 
     # Copy pg table
-    docker exec $POSTGRES_CONTAINER_NAME psql -U $POSTGRES_USER -d $POSTGRES_DB -p 5432 -c "$copy_cmd"
+    docker exec $POSTGRES_CONTAINER_NAME psql -U $POSTGRES_USER -d $POSTGRES_DB -p 5432 -c "$copy_cmd" &> /dev/null
+    echo "Copied $collection_name from Postgres to $PG_TO_MONGO_DATA_DIR"
     # Drop mongo collection
-    docker exec $MONGO_CONTAINER_NAME mongosh mongodb://$MONGO_USER:$MONGO_PASSWORD@$MONGO_HOST:$MONGO_PORT/$MONGO_DB --authenticationDatabase admin --eval "db.$collection_name.drop()" 
+    docker exec $MONGO_CONTAINER_NAME mongosh mongodb://$MONGO_USER:$MONGO_PASSWORD@$MONGO_HOST:$MONGO_PORT/$MONGO_DB --authenticationDatabase admin --eval "db.$collection_name.drop()" &> /dev/null
+    echo "Dropped $collection_name from Mongo"
     # If extra command is not empty, execute it
     if [[ ! -z $mongo_extra_cmd ]]
     then
-        docker exec $MONGO_CONTAINER_NAME mongosh mongodb://$MONGO_USER:$MONGO_PASSWORD@$MONGO_HOST:$MONGO_PORT/$MONGO_DB --authenticationDatabase admin --eval "$mongo_extra_cmd"
+        docker exec $MONGO_CONTAINER_NAME mongosh mongodb://$MONGO_USER:$MONGO_PASSWORD@$MONGO_HOST:$MONGO_PORT/$MONGO_DB --authenticationDatabase admin --eval "$mongo_extra_cmd" &> /dev/null
+        echo "Executed extra command for $collection_name"
     fi
     # Import data to mongo
-    docker exec $MONGO_CONTAINER_NAME mongoimport --username $MONGO_USER --password $MONGO_PASSWORD --host $MONGO_HOST --port $MONGO_PORT --db $MONGO_DB --authenticationDatabase admin --collection $collection_name $mongo_params
+    docker exec $MONGO_CONTAINER_NAME mongoimport --username $MONGO_USER --password $MONGO_PASSWORD --host $MONGO_HOST --port $MONGO_PORT --db $MONGO_DB --authenticationDatabase admin --collection $collection_name $mongo_params &> /dev/null
+    echo "Imported $collection_name to Mongo"
+    echo "--------------------------------------------"
 }
 
 # Copy E01_CLIENTE table from Postgres to Mongo
