@@ -1,3 +1,5 @@
+script_dir=$(dirname $0)
+
 # Creates project in local machine
 echo "Creating project in local machine with docker compose..."
 echo "--------------------------------------------"
@@ -10,5 +12,5 @@ echo "--------------------------------------------"
 # Executes migration from Postgres to Mongo
 echo "Starting migration from Postgres to Mongo..."
 echo "--------------------------------------------"
-./pgToMongo.sh .env
+$script_dir/pgToMongo.sh .env
 echo "Migration from Postgres to Mongo finished!"
