@@ -38,6 +38,10 @@ db.E01_CLIENTE.aggregate([
     {
         $project:{
             _id:1,
+            nombre:1,
+            apellido:1,
+            direccion:1,
+            activo:1
         }
     }
 ])
@@ -60,31 +64,18 @@ db.E01_CLIENTE.aggregate([
     {
         $project:{
             _id:1,
+            nombre:1,
+            apellido:1,
+            direccion:1,
+            activo:1
         }
     }
 ])
 
 //4
-db.E01_FACTURA.aggregate([
-    {
-        $unwind:"$detalles_factura"
-    },
-    {
-        $lookup:{
-            from:"E01_PRODUCTO",
-            localField:"detalles_factura.codigo_producto",
-            foreignField:"_id",
-            as:"producto"
-        }
-    },
-    {
-        $project:{
-            codigo_producto:"$producto._id",
-            _id:0
-        }
-    }
-])
-
+db.E01_PRODUCTO.find({
+    _id:{$in:db.E01_FACTURA.distinct("detalles_factura.codigo_producto")}
+})
 
 //5
 db.E01_CLIENTE.aggregate([
@@ -100,18 +91,19 @@ db.E01_CLIENTE.aggregate([
 ])
 
 //6
-db.E01_FACTURA.aggregate([
+db.E01_CLIENTE.aggregate([
     {
-        $group:{
-        _id:"$nro_cliente",
-        total:{$sum:1}
+        $lookup:{
+            from:"E01_FACTURA",
+            localField:"_id",
+            foreignField:"nro_cliente",
+            as:"facturas"
         }
     },
     {
         $project:{
-            nro_cliente:"$_id",
-            total:1,
-            _id:0
+            _id:1,
+            cantidad_facturas:{$size:"$facturas"}
         }
     }
 ])
@@ -128,6 +120,16 @@ db.E01_FACTURA.aggregate([
     },
     {
         $match:{"cliente.nombre":"Pandora","cliente.apellido":"Tate"}
+    },
+    {
+        $project:{
+            fecha:1,
+            iva:1,
+            nro_factura:1,
+            total_sin_iva:1,
+            total_con_iva:1,
+            nro_cliente:"$cliente._id"
+        }
     }
 ])
 
@@ -150,6 +152,11 @@ db.E01_FACTURA.aggregate([
     {
         $project:{
             nro_factura:1,
+            fecha:1,
+            iva:1,
+            nro_cliente:1,
+            total_con_iva:1,
+            total_sin_iva:1,
             _id:0
         }
     }
