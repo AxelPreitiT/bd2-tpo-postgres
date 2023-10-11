@@ -3,7 +3,7 @@
 * Axel Facundo Preiti Tasat (62618): https://github.com/AxelPreitiT
 * Gastón Ariel Francois (62500): https://github.com/francoisgaston
 * José Rodolfo Mentasti (62248): https://github.com/JoseMenta
-* Maïwenn Boizumault (65988): 
+* Maïwenn Boizumault (65988): https://github.com/Maiwenn35 
 
 ## Ejecución
 El proyecto utiliza varios contenedores de docker, y se utiliza __docker compose__ para sincronizarlos </br>
@@ -23,7 +23,7 @@ En otros casos, sólo levanta los contendores creados
 Para migar los datos de Postgres a Mongo, incluyendo datos iniciales y los agregados mediante la API, se provee el script *pgToMongo.sh* en el directorio */scripts*</br>
 Para ejecutarlo, se deben mantener los contenedores corriendo como en cualquier ejecución y correr
 ```sh
-./pgToMongo.sh 
+./pgToMongo.sh .env 
 ```
 Luego, para cambiar la base de datos que utiliza la API, se debe modificar la variable __DBMS__ el archivo *.env* ubicado en la raíz del proyecto
 ```
